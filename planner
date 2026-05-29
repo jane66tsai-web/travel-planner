@@ -1,0 +1,125 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// 模擬資料
+#define MAX_LOCATIONS 3
+
+void showPage1();
+void showPage2();
+void showPage3();
+void showPage4();
+
+// 全域變數用來傳遞頁面資料
+int budgetInput = 0;
+int checkedCount = 0;
+
+int main() {
+    // 進入主頁
+    showPage1();
+    return 0;
+}
+
+// === 第一頁面：主頁 ===
+void showPage1() {
+    int choice;
+    char reelsLink[100];
+    
+    printf("\n========= [ 主頁 ] =========\n");
+    printf("1. 複製 Reels 連結並貼上解析地點\n");
+    printf("2. 規劃行程 (跳至第二頁)\n");
+    printf("3. 想去的地點清單 (查看地圖)\n");
+    printf("請選擇操作 (1-3): ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        printf("請貼上 Reels 連結: ");
+        scanf("%s", reelsLink);
+        printf("[系統通知] 成功解析連結！已將 Reels 中的景點標註至地圖清單。\n");
+        showPage1(); // 返回主頁
+    } else if (choice == 2) {
+        showPage2(); // 跳至第二頁
+    } else {
+        printf("[地圖開啟中] 顯示所有特殊地標圖示...\n");
+        showPage1();
+    }
+}
+
+// === 第二頁面：輸入旅遊條件 ===
+void showPage2() {
+    char city[30], date[20], startPoint[50];
+    
+    printf("\n========= [ 第二頁面：旅遊條件輸入 ] =========\n");
+    printf("請選擇旅遊區域 (台灣各縣市): ");
+    scanf("%s", city);
+    printf("請輸入旅遊詳細時間 (YYYY-MM-DD): ");
+    scanf("%s", date);
+    printf("請輸入行程預算 (新台幣): ");
+    scanf("%d", &budgetInput);
+    printf("請輸入每日出發地點: ");
+    scanf("%s", startPoint);
+
+    printf("\n[系統提示] 資料載入中，即將進入地點勾選頁面...\n");
+    showPage3(); // 跳至第三頁
+}
+
+// === 第三頁面：勾選想去的地點 ===
+void showPage3() {
+    int choice;
+    // 模擬依距離由近到遠排序的地點
+    printf("\n========= [ 第三頁面：景點勾選 (依距離由近到遠排序) ] =========\n");
+    printf("1. [ ] 景點 A (距離 1.2 km, 預估花費 $500)\n");
+    printf("2. [ ] 景點 B (距離 4.5 km, 預估花費 $200)\n");
+    printf("3. [ ] 景點 C (距離 12.0 km, 預估花費 $1200)\n");
+    
+    printf("請輸入你想勾選的景點編號 (輸入 0 結束勾選並送出): ");
+    while(1) {
+        scanf("%d", &choice);
+        if (choice == 0) break;
+        if (choice >= 1 && choice <= 3) {
+            checkedCount++;
+            printf("已勾選景點 %d\n", choice);
+        }
+    }
+    showPage4(); // 跳至第四頁
+}
+
+// === 第四頁面：行程規劃結果 ===
+void showPage4() {
+    int finalChoice;
+    printf("\n========= [ 第四頁面：為你規劃以下行程 ] =========\n");
+    printf("[ AI 已根據您的需求生成 3 個版本的行程圖 ]\n\n");
+
+    // 版本 1：綠色方案 (預算內)
+    printf("\033[1;32m"); // 切換至綠色文字
+    printf("【版本 A：經濟悠閒風】(未超出預算)\n");
+    printf(" - 交通方式：捷運 + 步行\n");
+    printf(" - 穿搭建議：今日多雲，建議穿著透氣排汗衣物與運動鞋\n");
+    printf(" - 行程路線：出發點 -> 景點 A -> 景點 B\n");
+    printf("\033[0m"); // 重設文字顏色
+
+    // 版本 2：紅色方案 (超出預算)
+    printf("\033[1;31m"); // 切換至紅色文字
+    printf("\n【版本 B：豪華深度遊】(已超出預算！)\n");
+    printf(" - 交通方式：計程車包車\n");
+    printf(" - 穿搭建議：景點 C 位於山區體感稍涼，請攜帶薄外套\n");
+    printf(" - 行程路線：出發點 -> 景點 A -> 景點 C\n");
+    printf("\033[0m");
+
+    // 版本 3
+    printf("\n【版本 C：AI 推薦私房路線】\n");
+    printf(" - 交通方式：共享機車\n");
+    printf(" - 行程路線：出發點 -> AI 精選免費秘境 -> 景點 B\n");
+
+    printf("\n-----------------------------------\n");
+    printf("1. 重新規劃 (返回第二頁)\n");
+    printf("2. 返回主頁\n");
+    printf("請選擇下一步: ");
+    scanf("%d", &finalChoice);
+
+    if (finalChoice == 1) {
+        showPage2();
+    } else {
+        showPage1();
+    }
+}
