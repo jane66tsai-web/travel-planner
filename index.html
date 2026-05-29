@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 智慧旅遊規劃助手</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .page { display: none; max-width: 500px; margin: 30px auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .active { display: block; }
+        h2 { text-align: center; color: #2c3e50; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="date"], select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #2980b9; }
+        .checkbox-group { margin: 15px 0; }
+        .checkbox-item { background: #f9f9f9; padding: 10px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .plan-card { border: 2px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; background: #fff; }
+        .budget-green { border-color: #2ecc71; background-color: #e8f8f0; }
+        .budget-red { border-color: #e74c3c; background-color: #fdedec; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; }
+        .badge-green { background-color: #2ecc71; }
+        .badge-red { background-color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+    <div id="page1" class="page active">
+        <h2>🌍 旅遊規劃助手 - 主頁</h2>
+        <div class="form-group">
+            <label>新增想去的地點（文字）</label>
+            <input type="text" placeholder="輸入景點名稱">
+        </div>
+        <div class="form-group">
+            <label>貼上 Reels 連結解析地點</label>
+            <input type="text" placeholder="https://www.instagram.com/reels/...">
+            <button onclick="alert('連結解析成功！已成功將影片地點標註至想去清單。')">送出連結</button>
+        </div>
+        <hr>
+        <button onclick="switchPage(2)">🎯 規劃行程</button>
+        <button onclick="alert('地圖開啟中... 顯示特殊地標圖示。')" style="background-color: #2ecc71;">🗺️ 想去的地點清單</button>
+    </div>
+
+    <div id="page2" class="page">
+        <h2>📅 輸入旅遊條件</h2>
+        <div class="form-group">
+            <label>旅遊區域 (台灣各縣市)</label>
+            <select id="citySelect">
+                <option>台北市</option><option>台中市</option><option>高雄市</option><option>台南市</option><option>屏東縣</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>旅遊詳細時間</label>
+            <input type="date" id="travelDate">
+        </div>
+        <div class="form-group">
+            <label>行程預算</label>
+            <select id="budgetSelect">
+                <option value="3000">低預算 ($3,000)</option>
+                <option value="8000">中預算 ($8,000)</option>
+                <option value="15000">高預算 ($15,000)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>每日出發地點</label>
+            <input type="text" id="startPoint" placeholder="例如：高雄火車站">
+        </div>
+        <button onclick="switchPage(3)">下一步：勾選景點 ➡️</button>
+    </div>
+
+    <div id="page3" class="page">
+        <h2>📍 勾選想去的地點</h2>
+        <p style="font-size: 14px; color: #666;">* 景點已依據與出發點之遠近（由近到遠）排序</p>
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <label><input type="checkbox" class="spot" value="景點A" data-cost="1500"> 景點 A (近 - 預估 $1500)</label>
+            </div>
+            <div class="checkbox-item">
+                <label><input type="checkbox" class="spot" value="景點B" data-cost="2500"> 景點 B (中 - 預估 $2500)</label>
+            </div>
+            <div class="checkbox-item">
+                <label><input type="checkbox" class="spot" value="景點C" data-cost="6000"> 景點 C (遠 - 預估 $6000)</label>
+            </div>
+        </div>
+        <button onclick="generatePlans()">生成行程方案 ➡️</button>
+    </div>
+
+    <div id="page4" class="page">
+        <h2>✨ 為你規劃以下行程</h2>
+        <div id="plansContainer"></div>
+        <button onclick="switchPage(2)" style="background-color: #e67e22;">🔄 重新規劃</button>
+        <button onclick="switchPage(1)" style="background-color: #95a5a6;">🏠 返回主頁</button>
+    </div>
+
+    <script>
+        // 簡單的頁面切換邏輯
+        function switchPage(pageNumber) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById('page' + pageNumber).classList.add('active');
+        }
+
+        // 模擬 AI 生成三張行程規劃與預算判斷
+        function generatePlans() {
+            const userBudget = parseInt(document.getElementById('budgetSelect').value);
+            
+            // 計算勾選景點的總花費 (這裡做簡易模擬)
+            let selectedCost = 0;
+            document.querySelectorAll('.spot:checked').forEach(spot => {
+                selectedCost += parseInt(spot.getAttribute('data-cost'));
+            });
+            if(selectedCost === 0) selectedCost = 4000; // 若無勾選，由 AI 預估一組花費
+
+            // 模擬三個版本的花費
+            const costs = [selectedCost * 0.7, selectedCost * 1.1, selectedCost * 1.5];
+            const versions = ["方案 A：經濟便捷版", "方案 B：深度體驗版", "方案 C：豪華充實版"];
+            const transports = ["大眾運輸 (捷運+公車)", "共享機車/租車", "包車/計程車"];
+            
+            let htmlContent = "";
+
+            for (let i = 0; i < 3; i++) {
+                const isOverBudget = costs[i] > userBudget;
+                const cardClass = isOverBudget ? "plan-card budget-red" : "plan-card budget-green";
+                const badgeClass = isOverBudget ? "badge badge-red" : "badge badge-green";
+                const badgeText = isOverBudget ? "超出預算" : "預算內";
+
+                htmlContent += `
+                    <div class="${cardClass}">
+                        <h3>${versions[i]} <span class="${badgeClass}">${badgeText}</span></h3>
+                        <p><strong>估計花費：</strong> $${Math.round(costs[i])}</p>
+                        <p><strong>交通方式：</strong> ${transports[i]}</p>
+                        <p><strong>穿搭建議：</strong> 根據當地天氣，建議穿著舒適布鞋與防風外套。</p>
+                        <p style="font-size: 13px; color: #7f8c8d;">[行程圖區塊] 路線：出發點 ➡️ 景點規劃內容</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('plansContainer').innerHTML = htmlContent;
+            switchPage(4);
+        }
+    </script>
+</body>
+</html>
